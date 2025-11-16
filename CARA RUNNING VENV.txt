@@ -1,0 +1,11 @@
+# Buat virtual environment
+python -m venv venv
+
+# Aktivasi venv
+venv\Scripts\Activate
+
+# Upgrade pip
+python -m pip install --upgrade pip
+
+# Install dependencies
+pip install -r requirements.txt

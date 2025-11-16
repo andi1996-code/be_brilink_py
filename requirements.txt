@@ -1,0 +1,11 @@
+Flask
+Flask-SQLAlchemy
+SQLAlchemy
+python-dotenv
+pymysql
+Werkzeug
+requests
+PyJWT
+reportlab
+Pillow
+pyinstaller
