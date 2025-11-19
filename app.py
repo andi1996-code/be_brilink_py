@@ -29,6 +29,7 @@ def create_app(config_name=None):
     from routes.cash_flow import cash_flow_bp
     from routes.dashboard import dashboard_bp
     from routes.reports import reports_bp
+    from routes.cashier import cashier_bp
     
     app.register_blueprint(health_bp)
     app.register_blueprint(auth_bp)
@@ -41,6 +42,7 @@ def create_app(config_name=None):
     app.register_blueprint(cash_flow_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(reports_bp)
+    app.register_blueprint(cashier_bp)
     
     # Error handlers
     @app.errorhandler(404)

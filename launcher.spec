@@ -45,6 +45,7 @@ a = Analysis(
         'routes.dashboard',
         'routes.edc',
         'routes.health',
+        'routes.cashier',
         'routes.reports',
         'routes.service_fee',
         'routes.service',
