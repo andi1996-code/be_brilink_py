@@ -9,20 +9,6 @@ from utils.jwt_handler import token_required
 
 bank_fee_bp = Blueprint('bank_fee', __name__, url_prefix='/api/bank-fees')
 
-def check_agent_ownership(user_id, agent_id):
-    """Check if user owns the agent profile"""
-    agent = AgentProfile.query.get(agent_id)
-    if not agent or agent.user_id != user_id:
-        return False
-    return True
-
-def check_edc_ownership(user_id, edc_id):
-    """Check if user owns the EDC machine"""
-    edc = EdcMachine.query.get(edc_id)
-    if not edc:
-        return False
-    return check_agent_ownership(user_id, edc.agent_profile_id)
-
 @bank_fee_bp.route('', methods=['GET'])
 @token_required
 def get_bank_fees():
@@ -83,8 +69,6 @@ def get_bank_fee(fee_id):
 def create_bank_fee():
     """Create new bank fee"""
     try:
-        user_id = request.user_id
-        
         data = request.get_json()
         
         if not data:
@@ -103,23 +87,6 @@ def create_bank_fee():
                 message='edc_machine_id dan service_id wajib diisi',
                 error='MISSING_FIELDS',
                 status_code=400
-            )
-        
-        # Check EDC ownership
-        if not check_edc_ownership(user_id, edc_machine_id):
-            return error_response(
-                message='Anda tidak memiliki akses ke EDC machine ini',
-                error='FORBIDDEN',
-                status_code=403
-            )
-        
-        # Check service exists
-        service = Service.query.get(service_id)
-        if not service:
-            return error_response(
-                message='Service tidak ditemukan',
-                error='NOT_FOUND',
-                status_code=404
             )
         
         # Validate fee
@@ -180,8 +147,6 @@ def create_bank_fee():
 def update_bank_fee(fee_id):
     """Update bank fee"""
     try:
-        user_id = request.user_id
-        
         fee_obj = BankFee.query.get(fee_id)
         
         if not fee_obj:
@@ -189,13 +154,6 @@ def update_bank_fee(fee_id):
                 message='Bank fee tidak ditemukan',
                 error='NOT_FOUND',
                 status_code=404
-            )
-        
-        if not check_edc_ownership(user_id, fee_obj.edc_machine_id):
-            return error_response(
-                message='Anda tidak memiliki akses untuk mengubah bank fee ini',
-                error='FORBIDDEN',
-                status_code=403
             )
         
         data = request.get_json()
@@ -246,8 +204,6 @@ def update_bank_fee(fee_id):
 def delete_bank_fee(fee_id):
     """Delete bank fee"""
     try:
-        user_id = request.user_id
-        
         fee_obj = BankFee.query.get(fee_id)
         
         if not fee_obj:
@@ -255,13 +211,6 @@ def delete_bank_fee(fee_id):
                 message='Bank fee tidak ditemukan',
                 error='NOT_FOUND',
                 status_code=404
-            )
-        
-        if not check_edc_ownership(user_id, fee_obj.edc_machine_id):
-            return error_response(
-                message='Anda tidak memiliki akses untuk menghapus bank fee ini',
-                error='FORBIDDEN',
-                status_code=403
             )
         
         db.session.delete(fee_obj)
