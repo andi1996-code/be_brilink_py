@@ -473,6 +473,11 @@ http://localhost:5000/
 │   └── /                     [POST] ➕ Create transaction
 │
 ├── /cash-flow/               [GET]  📊 List cash flows
+├── /edc-machines/            [GET]  📋 List EDC machines
+│   ├── /:id                  [GET]  💳 Get EDC machine
+│   ├── /:id                  [POST] 🔧 Update EDC machine
+│   └── /reset-all            [POST] 🔁 Reset semua saldo EDC, cash flow, dan tunai di tangan (tidak memerlukan validasi)
+
 │   └── /                     [POST] ➕ Create cash flow
 │
 ├── /services/                [GET]  📋 List services

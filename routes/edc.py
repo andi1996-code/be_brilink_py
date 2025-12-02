@@ -2,6 +2,7 @@ from flask import Blueprint, request
 from models.user import db, User
 from models.agent_profile import AgentProfile
 from models.edc_machine import EdcMachine
+from models.cash_flow import CashFlow
 from utils.response import success_response, error_response
 from utils.jwt_handler import token_required
 from decimal import Decimal, InvalidOperation
@@ -443,6 +444,48 @@ def add_edc_saldo(machine_id):
         db.session.rollback()
         return error_response(
             message='Terjadi kesalahan saat menambah saldo EDC',
+            error='INTERNAL_ERROR',
+            details={'error': str(e)},
+            status_code=500
+        )
+
+
+@edc_bp.route('/reset-all', methods=['POST'])
+def reset_all_balances():
+    """Owner-only: Reset semua saldo EDC, hapus semua cash flow (cash_in/cash_out),
+    dan reset total_balance (tunai di tangan) semua agent menjadi 0.
+
+    Response contains counts of affected rows for convenience.
+    """
+    try:
+        # NOTE: No authentication/validation by design — this endpoint is intentionally open
+        # and will reset all EDC balances, agent tunai and delete cash flow records.
+
+        # Bulk reset EDC saldo -> 0
+        edc_updated = db.session.query(EdcMachine).update({EdcMachine.saldo: 0})
+
+        # Bulk reset agent total_balance -> 0
+        agents_updated = db.session.query(AgentProfile).update({AgentProfile.total_balance: 0})
+
+        # Delete all cash flow records
+        cashflows_deleted = db.session.query(CashFlow).delete()
+
+        db.session.commit()
+
+        return success_response(
+            data={
+                'edc_machines_reset': int(edc_updated),
+                'agents_reset': int(agents_updated),
+                'cashflows_deleted': int(cashflows_deleted)
+            },
+            message='Semua saldo EDC, cash flow, dan tunai di tangan berhasil di-reset',
+            status_code=200
+        )
+
+    except Exception as e:
+        db.session.rollback()
+        return error_response(
+            message='Terjadi kesalahan saat mereset data',
             error='INTERNAL_ERROR',
             details={'error': str(e)},
             status_code=500
