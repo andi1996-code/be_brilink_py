@@ -329,8 +329,6 @@ def update_edc_machine(machine_id):
 def delete_edc_machine(machine_id):
     """Delete EDC machine"""
     try:
-        user_id = request.user_id
-        
         machine = EdcMachine.query.get(machine_id)
         
         if not machine:
@@ -338,14 +336,6 @@ def delete_edc_machine(machine_id):
                 message='EDC machine tidak ditemukan',
                 error='NOT_FOUND',
                 status_code=404
-            )
-        
-        # Check ownership
-        if not check_agent_ownership(user_id, machine.agent_profile_id):
-            return error_response(
-                message='Anda tidak memiliki akses untuk menghapus EDC machine ini',
-                error='FORBIDDEN',
-                status_code=403
             )
         
         db.session.delete(machine)
